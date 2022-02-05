@@ -1,6 +1,8 @@
 # 2022CoprocessorVision
 Repository for python and other code belonging to the Pi/Jetson coprocessor
 
+Ball Detection using python
+
 dependency: name:"opencv-python", "version": "4.5.3.56"
 
 usage: python3 findCircle2.py [-debug|-release|-nogui]
