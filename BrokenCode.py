@@ -387,7 +387,7 @@ while True :
 
                 ydist = dis[1]
                 xdist = dis[0]
-                ydist = ydist*2
+                #ydist = ydist*2
                 averageYValues.append(ydist)
                 averageXValues.append(xdist)
                 # remove first value
