@@ -128,7 +128,7 @@ def getDistance(pr):
     r = 4.5
     d = ((fl*r)/pr)#*1.008
     # use Hconstant
-    CONSTANT = 2500
+    CONSTANT = 2450
     c = CONSTANT/pr
     try:
         xdist = math.sqrt((c**2)-(d**2))
@@ -224,7 +224,7 @@ for i in RedTrainingValues:
     if (NOGUI == False):
         cv2.setTrackbarPos(i[0], i[1], RedTrainingValues[i])
 
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(4)
 # if (img_path == None):
 #     try:
 #         camera = cv2.VideoCapture(0)
