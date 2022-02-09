@@ -24,7 +24,7 @@ Run:
 
 - `git clone https://github.com/Robotiators-888/2022CoprocessorVision.git`
 - `cd 2022CoprocessorVision`
-- `python3 findCircle.py [-debug/-release/-nogui]
+- `python3 findCircle.py [-debug/-release/-nogui]`
 
 ### Arguments
 
