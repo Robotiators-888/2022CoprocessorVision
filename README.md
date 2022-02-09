@@ -1,9 +1,9 @@
 # 2022CoprocessorVision
 Repository for python and other code belonging to the Pi/Jetson coprocessor
 
-## Real Time Mulit-Color Ball Distance Detection
+## Real Time Multi-Color Ball Distance Detection
 
-
+Information regarding how the code works can be found [here](https://docs.google.com/document/d/1T7HtNdfvn1StiSUksobv4tKdpAKSKY8LUWGizXgedSI/edit?usp=sharing).
 
 ## Usage
 
