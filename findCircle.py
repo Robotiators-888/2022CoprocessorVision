@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import imp
 from pickle import TRUE
 import cv2
@@ -17,6 +19,10 @@ DEBUG = False
 NOGUI = False
 
 img_path = None
+
+#TODO:
+# 1 - allow specifying camera id and red/blue ball in args
+# 2 send UDP true/false for red/blue ball
 
 # get command line arguments
 if len(sys.argv) > 1:
@@ -64,6 +70,7 @@ if len(sys.argv) > 1:
             print('Using image as input')
             arg4 = sys.argv[3]
             img_path = arg4
+    
 else:
     print('missing argument')
     print('usage: python3 findCircle2.py [-debug|-release|-nogui]')
@@ -72,13 +79,14 @@ else:
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(("127.0.0.1", 8888))
+if (DEBUG == False):
+    sock.bind(("10.8.88.86", 8888))
 
 
 def sendUDP(x, y, detected):
     global sock
     msg = struct.pack(">ff?", x, y, detected)
-    sock.sendto(msg, ("127.0.0.1", 5802))
+    sock.sendto(msg, ("10.8.88.2", 5802))
 
     return "Success"
 
@@ -106,15 +114,6 @@ def isInRange(X, X2, t):
     else:
         return False
 
-# TODO: use radius of circle to find new min max for Hough Alg Size
-# then withing while loop run Hough circles again to get super accurate radius
-
-
-# background = image_raw
-# background = cv2.cvtColor(background, cv2.COLOR_BGR2GRAY)
-#img_path = 'ballr/redbig_2.mp4/img/5.png'
-
-
 def nothing(x):
     pass
 
@@ -122,29 +121,8 @@ def nothing(x):
 def inchesToMeters(inches):
     return inches * 0.0254
 
-
-def getDistance(pr):
-    fl = 540.0  # new
-    r = 4.5
-    d = ((fl*r)/pr)#*1.008
-    # use Hconstant
-    CONSTANT = 2450
-    c = CONSTANT/pr
-    try:
-        xdist = math.sqrt((c**2)-(d**2))
-        ydist = d
-        return [xdist, ydist]
-    except ValueError:
-        xdist = 0
-        ydist = 0
-    #print('xdist', xdist,'ydist', ydist)
-        # p = i[2]
-for i in range(85,90): print(getDistance(i))
-
-# function to check if the inputed meters away Y corridinate corilates with how close the ball should be to the horrizen based on inputed pixel radius
-# def horizen(px_radius,y_meters_away):
 valueTracker = []
-# if not (NOGUI):
+
 if (NOGUI == False):
     cv2.namedWindow('slider')
     cv2.namedWindow('slider2')
@@ -194,6 +172,8 @@ if (NOGUI == False):
     valueTracker.append(('maxDist', 'slider2'))
     cv2.createTrackbar('HConstant', 'slider2', 2000, 3000, nothing)
     valueTracker.append(('HConstant', 'slider2'))
+    cv2.createTrackbar('CONSTANT', 'slider2', -1, 400, nothing)
+    valueTracker.append(('CONSTANT', 'slider2'))
 
 
 OrangeBallValues = {('hue', 'slider'): 0, ('sat', 'slider'): 81, ('val', 'slider'): 65, ('hue2', 'slider2'): 12, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255,
@@ -202,7 +182,8 @@ OrangeBallValues = {('hue', 'slider'): 0, ('sat', 'slider'): 81, ('val', 'slider
 #                      : 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 200, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 21, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
 BlueTrainingValues = {('hue', 'slider'): 32, ('sat', 'slider'): 71, ('val', 'slider'): 13, ('hue2', 'slider2'): 146, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2')
                        : 53, ('minRadius', 'slider2'): 24, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 45, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
-RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 21, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
+#RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 21, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
+RedTrainingValues ={('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 28, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000,('CONSTANT', 'slider2'):2500}#
 # current ^
 
 averageYValues = []
@@ -216,6 +197,38 @@ ValueMap = {}
 global Visualize 
 Visualize = False
 
+# get distance SECTION:
+def getDistance(pr,pxFromCenterX):
+    fl = 540.0  # new
+    r = 4.5
+    d = ((fl*r)/pr)#*1.008
+    # use Hconstant
+    CONSTANT = 2450
+
+    #CONSTANT = ValueMap[('CONSTANT', 'slider2')]
+    #c = CONSTANT/pr
+    try:
+        #fov = 56
+        #fov in radians
+        Rfov = 0.97738438
+
+        xt = math.tan((Rfov/2))*d
+
+
+        n = 640
+        p = pxFromCenterX
+
+        xdist = (2*xt*p)/n
+
+
+        #xdist = abs(xdist)
+        #xdist = math.sqrt((c**2)-(d**2))
+        ydist = d
+        return [xdist, ydist]
+    except ValueError:
+        xdist = 0
+        ydist = 0
+
 # ROBOT VALUES SECTION:
 #RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 74, ('val', 'slider'): 49, ('hue2', 'slider2'): 12, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 112, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 0, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 27, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100}
 #RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 156, ('val', 'slider'): 73, ('hue2', 'slider2'): 179, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 112, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 14, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
@@ -224,14 +237,7 @@ for i in RedTrainingValues:
     if (NOGUI == False):
         cv2.setTrackbarPos(i[0], i[1], RedTrainingValues[i])
 
-camera = cv2.VideoCapture(4)
-# if (img_path == None):
-#     try:
-#         camera = cv2.VideoCapture(0)
-#     except Exception as e:
-#         print(e)
-#         print("No camera found")
-#         exit()
+camera = cv2.VideoCapture(0)
 
 
 def findCircle(img):
@@ -284,6 +290,14 @@ def findCircle(img):
     cv2.drawContours(countour_image, contour, -1, (0, 255, 0), 1)
     countour_image = cv2.cvtColor(countour_image, cv2.COLOR_BGR2GRAY)
 
+    # get percentage of white pixels in mask
+    whitePixels = np.count_nonzero(gray)
+    if (whitePixels > 100966):
+        print('frame will cause extreme lag')
+        if (DEBUG == False):
+            sendUDP(0, 0, False)
+    #print('white pixels: ' + str(whitePixels))
+
     if len(contour) != 0:
         circles = cv2.HoughCircles(gray,  cv2.HOUGH_GRADIENT,
                                    ValueMap[('minDist', 'slider2')],
@@ -318,20 +332,9 @@ def findCircle(img):
 
                 try:
                     dis = None
-                    if (i[0] < frame.shape[1]/2):
-                        dis = getDistance(r)
-                    else:
-                        dis = getDistance(r)
-                    # if (len(averageXValues) > 19):
-                    #     averageX = sum(averageXValues)/len(averageXValues)
-                    #     if (dis[0]/averageX > 1.4 or dis[0]/averageX < 0.6):
-                    #         break
-                    # print(len(averageXValues))
-                    # if (len(averageXValues) > 19):
-                    #     averageY = sum(averageYValues)/len(averageYValues)
-                    #     print(dis[1]/averageY)
-                    #     if (dis[1]/averageY > 1.4 or dis[1]/averageY < 0.6):
-                    #         break
+                    pxFromCenterX = i[0] - frame.shape[1] / 2
+
+                    dis = getDistance(r,pxFromCenterX)
 
                     # TODO: SHADOW DETECTION
                     center = [i[0], i[1]]
@@ -350,7 +353,7 @@ def findCircle(img):
                             averageColor += shadowRectangle[x][y][2]
                     averageColor = averageColor / \
                         (shadowRectangle.shape[0]*shadowRectangle.shape[1])
-                    print('averageColor', averageColor)
+                    #print('averageColor', averageColor)
                     # was 40 but changed to 100
                     if averageColor > 50:
                         break
@@ -369,29 +372,13 @@ def findCircle(img):
                     else:
                         print('notonGround', onGroundRatio)
 
-                    # get a rectange under the cricle from frame
-                    # get the average of the rectangle
-
-                    # create a image from the
-                    # boundingRect = frame[
-
-                    # convert to hsv
-
-                    #average = cv2.cvtColor(averagePerColumn, cv2.COLOR_BGR2HSV)
-
-                    # determine the dominant color from average
-
-                    # draw the rectangle not touching the circle
-                    #cv2.rectangle(frame, (center[0] - i[2], center[1] - i[2]), (center[0] + i[2], center[1] + int(i[2]/7), (0, 255, 0), 2))
-
-                    #shadowRectangle = frame[i[1]-i[2]:i[1]+i[2], i[0]-i[2]:i[0]+i[2]]
-
+                    
                 except Exception as e:
                     print("error finding ball", e)
             if (closestCircle is not None): # code that runs on the closest found ball
                 i = closestCircle
                 r = i[2]
-                print('radius', i[2])
+                #print('radius', i[2])
                 cv2.circle(frame, (i[0], i[1]), i[2], (0, 0, 255), 7)
                 cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
                 # draw on maske_image
@@ -401,12 +388,11 @@ def findCircle(img):
                 cv2.circle(masked_image, (i[0], i[1]), i[2], (0, 0, 255), 7)
                 cv2.circle(masked_image, (i[0], i[1]), 2, (0, 0, 0), 3)
 
+
                 dis = None
-                if (i[0] < frame.shape[1]/2):
-                    dis = getDistance(r)
-                    dis[0] = -dis[0]
-                else:
-                    dis = getDistance(r)
+                pxFromCenterX = i[0] - frame.shape[1] / 2
+                print('pxFromCenterX', pxFromCenterX)
+                dis = getDistance(r,pxFromCenterX)
 
                 ydist = dis[1]
                 xdist = dis[0]
@@ -421,7 +407,7 @@ def findCircle(img):
                 # get average
                 averageY = sum(averageYValues)/len(averageYValues)
                 averageX = sum(averageXValues)/len(averageXValues)
-                print('averageY', averageY, 'averageX', averageX)
+                #print('averageY', averageY, 'averageX', averageX)
 
                 # TODO: tune output like this to desired position
 
@@ -445,6 +431,7 @@ def findCircle(img):
                 if averageCounter < 0:
                     averageCounter -= 1
         else:
+            print('no ball found')
             if (DEBUG == False):
                 sendUDP(0, 0, False)
 
@@ -459,10 +446,11 @@ def findCircle(img):
         cv2.imshow('frame', frame)
 
         key = cv2.waitKey(1)
-        if key == 27 or key == ord('q'):
+        # SECTION: check for key presses, refere to -help for what key presses do
+        if key == 27 or key == ord('q'): # Q key
             exit()
         # key for s
-        if key == ord('s'):
+        if key == ord('s'): # save 
             print('printing values:')
             values = {}
             for i in valueTracker:
@@ -470,11 +458,11 @@ def findCircle(img):
                 values[i] = cv2.getTrackbarPos(i[0], i[1])
             print(values)
             print('\n')
-        if key == ord('o'):
+        if key == ord('o'): # O key
             print("wrote output")
             ret, frame = camera.read()
             cv2.imwrite('frame.png', frame)
-        if key == ord('r'):
+        if key == ord('r'): # 
             print("wrote video")
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
@@ -490,14 +478,14 @@ def findCircle(img):
             Visualize = not Visualize
 
 
-# loop
+# main loop
 while True:
     # Capture frame
     if (img_path == None):  # read frame from camera
         findCircle(camera.read()[1])
     elif (img_path != None):  # read frame from file
         findCircle(cv2.imread(img_path))
-    if (NOGUI == False):
+    if (NOGUI == False): # get slider values then put into ValueMap
         Newvalues = {}
         for i in valueTracker:
             # get the value from the slider put in values
