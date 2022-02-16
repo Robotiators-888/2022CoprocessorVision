@@ -26,7 +26,7 @@ img_path = None
 
 # get command line arguments
 if len(sys.argv) > 1:
-    print(len(sys.argv))
+    #print(len(sys.argv))
     arg2 = sys.argv[1]
     if arg2 == '-h' or arg2 == '-help':
         print('usage: python3 findCircle2.py [-debug|-release|-nogui]')
@@ -188,12 +188,15 @@ BlueTrainingValues = {('hue', 'slider'): 32, ('sat', 'slider'): 71, ('val', 'sli
 #RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 21, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000}
 
 # The input values for finding the Red Ball
-RedTrainingValues ={('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 28, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000,('CONSTANT', 'slider2'):2500}#
+#RedTrainingValues ={('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 30, ('maxRadius', 'slider2'): 150, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 28, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000,('CONSTANT', 'slider2'):2500}#
+#RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 21, ('maxRadius', 'slider2'): 102, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 14, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000, ('CONSTANT', 'slider2'): 400}
+#RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 21, ('maxRadius', 'slider2'): 102, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 17, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000, ('CONSTANT', 'slider2'): 400}
+RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slider'): 13, ('hue2', 'slider2'): 16, ('sat2', 'slider2'): 255, ('val2', 'slider2'): 255, ('th1', 'slider2'): 184, ('th2', 'slider2'): 53, ('minRadius', 'slider2'): 21, ('maxRadius', 'slider2'): 102, ('parem1', 'slider2'): 19, ('parem2', 'slider2'): 25, ('minDist', 'slider2'): 1, ('maxDist', 'slider2'): 100, ('HConstant', 'slider2'): 2000, ('CONSTANT', 'slider2'): 400}
 # current ^
 
 # SECTION: Average Dist Que
 # Que holding last n Y distances
-averageYValues = []
+averageYValues = [] 
 # Que holding last n X distances
 averageXValues = []
 # max amount of items in the que
@@ -216,18 +219,17 @@ Visualize = False
 #NOTE: Refere to documentation for more info
 #https://docs.google.com/document/d/1T7HtNdfvn1StiSUksobv4tKdpAKSKY8LUWGizXgedSI/edit
 def getDistance(pr,pxFromCenterX):
-    fl = 540.0
+    fl = 539.0
     r = 4.5
     d = ((fl*r)/pr)
     # use Hconstant
-    CONSTANT = 2450
 
     #CONSTANT = ValueMap[('CONSTANT', 'slider2')]
     #c = CONSTANT/pr
     try:
         #fov = 56
         #fov in radians
-        Rfov = 0.97738438
+        Rfov = 0.97738438111682
 
         xt = math.tan((Rfov/2))*d
 
@@ -271,7 +273,9 @@ def findCircle(img):
 
 
     # change image color space to HSV
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    umatFrame = cv2.UMat(frame)
+
+    hsv = cv2.cvtColor(umatFrame, cv2.COLOR_BGR2HSV)
 
     # SECTION: Mask image to only show color of ball
     lower_color = np.array([ValueMap[('hue', 'slider')], ValueMap[(
@@ -290,7 +294,7 @@ def findCircle(img):
     mask = cv2.dilate(mask, None, iterations=4)
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    print("Erode and Dilate Time: " + str(deltaTime))
+    #print("Erode and Dilate Time: " + str(deltaTime))
 
     # apply the mask to the image
     masked_image = cv2.bitwise_and(frame, frame, mask=mask)
@@ -306,21 +310,21 @@ def findCircle(img):
     # and use that as the center of the circle
     # DEBUGING method!
     startingTime = time.time()
-    averageLocation = np.where(gray == np.amax(gray))
-    x = averageLocation[1][0]
-    y = averageLocation[0][0]
-    if (Visualize):
-        cv2.circle(frame, (x, y), 10, (0, 0, 255), -1)
+    # averageLocation = np.where(gray == np.amax(gray))
+    # x = averageLocation[1][0]
+    # y = averageLocation[0][0]
+    # if (Visualize):
+    #     cv2.circle(frame, (x, y), 10, (0, 0, 255), -1)
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    print("Average Location Time: " + str(deltaTime))
+    #print("Average Location Time: " + str(deltaTime))
 
     # do a GaussianBlur to remove noise
     startingTime = time.time()
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    print("Gaussian Blur Time: " + str(deltaTime))
+    #print("Gaussian Blur Time: " + str(deltaTime))
 
     # get percentage of white pixels in mask
     # SECTION: detect laggy frame and skip
@@ -335,8 +339,8 @@ def findCircle(img):
         pass
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    print("White Pixels Time: " + str(deltaTime))
-        #print('frame will not cause lag')
+    #print("White Pixels Time: " + str(deltaTime))
+        ##print('frame will not cause lag')
 
     # startingTime = time.time()
     # edged = cv2.Canny(
@@ -353,15 +357,23 @@ def findCircle(img):
     # countour_image = cv2.cvtColor(countour_image, cv2.COLOR_BGR2GRAY)
     # endingTime = time.time()
     # deltaTime = endingTime - startingTime
-    # print("Contour Time: " + str(deltaTime))
+    # #print("Contour Time: " + str(deltaTime))
     
-    #print('white pixels: ' + str(whitePixels))
+    ##print('white pixels: ' + str(whitePixels))
 
     #if len(contour) != 0:
 
     halfGray = cv2.resize(gray, (0, 0), fx=0.5, fy=0.5)
+    # turn Umat halfGray into a normal image
+    halfGray = cv2.UMat.get(halfGray)
+
+
 
     startingTime = time.time()
+
+    # use TAPI for extra speed
+    #umatHalfGray = cv2.UMat(halfGray)
+
     circles = cv2.HoughCircles(halfGray,  cv2.HOUGH_GRADIENT,
                                 ValueMap[('minDist', 'slider2')],
                                 ValueMap[('maxDist', 'slider2')],
@@ -372,9 +384,9 @@ def findCircle(img):
                                 maxRadius=ValueMap[('maxRadius', 'slider2')])
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    print("Hough Circles Time: " + str(deltaTime))
+    #print("Hough Circles Time: " + str(deltaTime))
     if circles is not None:
-        #print("found circles!")
+        ##print("found circles!")
         
 
 
@@ -397,7 +409,7 @@ def findCircle(img):
             # check if radius is on left or right of screen
             # find ditstance from center of circle to bottom of screen
             distanceToBottom = frame.shape[0] - i[1] - i[2]
-            # print('distanceToBottom',distanceToBottom)
+            # #print('distanceToBottom',distanceToBottom)
             A = 163.5
             B = -879.9
             C = 1020.0
@@ -428,17 +440,33 @@ def findCircle(img):
                     (shadowRectangle.shape[0]*shadowRectangle.shape[1])
                 endingTime = time.time()
                 deltaTime = endingTime - startingTime
-                print("Average Color Time: " + str(deltaTime))
-                #print('averageColor', averageColor)
+               # #print("Average Color Time: " + str(deltaTime))
+                ##print('averageColor', averageColor)
                 # was 40 but changed to 100
-                if averageColor > 50:
+                print('averageCOlor',averageColor)
+                if (averageColor > 15 and averageColor < 80):
+                    pass
+                else:
                     break
+                # if averageColor > 15:
+                #     break
+                # else:
+                #     print('averageColor', averageColor)
+                # dis[1] inches to ball
 
-                X = dis[1]/12
+                X = dis[1]
+                A = 283.8
+                B = -163800.0
+                C = 24070000.0
                 Y = Caunchy(X, A, B, C)
+
+                #started at 21 going up by one inch per
+                #went up to 64
+
                 onGroundRatio = distanceToBottom/Y
-                if (onGroundRatio > -1 and onGroundRatio < 2.3):
-                    # print('onGround',onGroundRatio)
+                #if (onGroundRatio > -1 and onGroundRatio < 2.3):
+                if (onGroundRatio > -0.5 and onGroundRatio < 1.5):
+                    # #print('onGround',onGroundRatio)
                     totalDis = abs(dis[0]) + dis[1]
                     if (r > largestRadius):
                         largestDis = totalDis
@@ -581,6 +609,11 @@ while True:
     deltaTime = newTime - currentTime
     fps = 1/deltaTime
     currentTime = newTime
+    maxFps = 5
+    maxTime = maxFps/60 # in secs
+    if (deltaTime<maxTime):
+        waitTime = maxTime-deltaTime
+        time.sleep(waitTime)
     print('fps', fps)
     #print('''\n\n\n''')
 
