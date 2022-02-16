@@ -196,7 +196,7 @@ RedTrainingValues = {('hue', 'slider'): 0, ('sat', 'slider'): 52, ('val', 'slide
 
 # SECTION: Average Dist Que
 # Que holding last n Y distances
-averageYValues = []
+averageYValues = [] 
 # Que holding last n X distances
 averageXValues = []
 # max amount of items in the que
@@ -454,7 +454,10 @@ def findCircle(img):
                 #     print('averageColor', averageColor)
                 # dis[1] inches to ball
 
-                X = dis[1]/12
+                X = dis[1]
+                A = 283.8
+                B = -163800.0
+                C = 24070000.0
                 Y = Caunchy(X, A, B, C)
 
                 #started at 21 going up by one inch per
@@ -462,7 +465,7 @@ def findCircle(img):
 
                 onGroundRatio = distanceToBottom/Y
                 #if (onGroundRatio > -1 and onGroundRatio < 2.3):
-                if (onGroundRatio > 1 and onGroundRatio < 3.6):
+                if (onGroundRatio > -0.5 and onGroundRatio < 1.5):
                     # #print('onGround',onGroundRatio)
                     totalDis = abs(dis[0]) + dis[1]
                     if (r > largestRadius):
