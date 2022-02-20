@@ -15,9 +15,12 @@ import socket
 
 global sock
 
+# is in debug mode
 DEBUG = False
+# are we using gui windows
 NOGUI = False
 
+# path to input image
 img_path = None
 
 #TODO:
@@ -91,7 +94,7 @@ def sendUDP(x, y, detected):
 
     return "Success"
 
-
+# SECTION: math functions
 def Arrhenius(x, a, b):
     e = math.e
     p1 = b/x
@@ -259,22 +262,23 @@ for i in RedTrainingValues:
         cv2.setTrackbarPos(i[0], i[1], RedTrainingValues[i])
 
 # id of camera, usally 0
-cameraId = 4
+cameraId = 0
 
 # create a camera object
 camera = cv2.VideoCapture(cameraId)
 
 
-# SECTION: findCircle
+# SECTION: findCircle main method for finding the ball
 def findCircle(img):
     global Visualize
     frame = img
     orginalFrame = frame.copy()
 
 
-    # change image color space to HSV
+   # use Umat for 3 fps boost
     umatFrame = cv2.UMat(frame)
 
+     # change image color space to HSV
     hsv = cv2.cvtColor(umatFrame, cv2.COLOR_BGR2HSV)
 
     # SECTION: Mask image to only show color of ball
@@ -310,11 +314,6 @@ def findCircle(img):
     # and use that as the center of the circle
     # DEBUGING method!
     startingTime = time.time()
-    # averageLocation = np.where(gray == np.amax(gray))
-    # x = averageLocation[1][0]
-    # y = averageLocation[0][0]
-    # if (Visualize):
-    #     cv2.circle(frame, (x, y), 10, (0, 0, 255), -1)
     endingTime = time.time()
     deltaTime = endingTime - startingTime
     #print("Average Location Time: " + str(deltaTime))
@@ -324,7 +323,6 @@ def findCircle(img):
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    #print("Gaussian Blur Time: " + str(deltaTime))
 
     # get percentage of white pixels in mask
     # SECTION: detect laggy frame and skip
@@ -339,40 +337,14 @@ def findCircle(img):
         pass
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    #print("White Pixels Time: " + str(deltaTime))
-        ##print('frame will not cause lag')
-
-    # startingTime = time.time()
-    # edged = cv2.Canny(
-    #     gray, ValueMap['th1', 'slider2'], ValueMap['th2', 'slider2'])
-
-    # contour, hierarchy = cv2.findContours(edged,
-    #                                       cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    # contour = cv2.findContours(
-    #     gray.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-    # # check if edged is completley black
-    # countour_image = np.zeros(
-    #     (frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
-    # cv2.drawContours(countour_image, contour, -1, (0, 255, 0), 1)
-    # countour_image = cv2.cvtColor(countour_image, cv2.COLOR_BGR2GRAY)
-    # endingTime = time.time()
-    # deltaTime = endingTime - startingTime
-    # #print("Contour Time: " + str(deltaTime))
     
-    ##print('white pixels: ' + str(whitePixels))
-
-    #if len(contour) != 0:
-
+    #SECTION: HCircles
+    # half the image going to HCircles to reduce lag
     halfGray = cv2.resize(gray, (0, 0), fx=0.5, fy=0.5)
     # turn Umat halfGray into a normal image
     halfGray = cv2.UMat.get(halfGray)
 
-
-
     startingTime = time.time()
-
-    # use TAPI for extra speed
-    #umatHalfGray = cv2.UMat(halfGray)
 
     circles = cv2.HoughCircles(halfGray,  cv2.HOUGH_GRADIENT,
                                 ValueMap[('minDist', 'slider2')],
@@ -384,22 +356,21 @@ def findCircle(img):
                                 maxRadius=ValueMap[('maxRadius', 'slider2')])
     endingTime = time.time()
     deltaTime = endingTime - startingTime
-    #print("Hough Circles Time: " + str(deltaTime))
+    
+    # SECTION: found circles
     if circles is not None:
-        ##print("found circles!")
-        
-
-
+        # varibles hold one closest circle
         largestDis = 0
         largestRadius = 0
-        closestCircle = None        
+        closestCircle = None  
+
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
             # multiply all circles by 2 to get back to original size
             i[0] = i[0] * 2
             i[1] = i[1] * 2
             i[2] = i[2] * 2
-            if (Visualize):
+            if (Visualize): # draw extra information on screen if v toggle pressed
                 cv2.circle(frame, (i[0], i[1]), i[2], (162, 255, 0), 2)
                 cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
                 # draw on maske_image
@@ -425,9 +396,11 @@ def findCircle(img):
                 center[1] = center[1] + int(i[2]*1.2)
                 # plot center on frame
                 cv2.circle(frame, center, 2, (255, 0, 0), 3)
-                # draw a rectange at center
-                #cv2.rectangle(frame, (center[0] - int(i[2]/2), center[1] - int(i[2]/7)), (center[0] + int(i[2]/2), center[1] + int(i[2]/7)), (0, 255, 0), 2)
-                # cut this rectangle from frame and save it as a shadow
+                
+
+                # SECTION: shadow detection
+                # create a rectangle under the ball proportional to its radius
+                # average the HSV Value in the rectangle as averageColor
                 shadowRectangle = frame[center[1] - int(i[2]/7):center[1] + int(
                     i[2]/7), center[0] - int(i[2]/2):center[0] + int(i[2]/2)]
                 # averag3e the rectangle
@@ -440,20 +413,20 @@ def findCircle(img):
                     (shadowRectangle.shape[0]*shadowRectangle.shape[1])
                 endingTime = time.time()
                 deltaTime = endingTime - startingTime
-               # #print("Average Color Time: " + str(deltaTime))
-                ##print('averageColor', averageColor)
-                # was 40 but changed to 100
+               
+
                 print('averageCOlor',averageColor)
+                # Value is how light or dark the color is
+                # if averageColor in this range its color of balls shadow
                 if (averageColor > 15 and averageColor < 80):
                     pass
                 else:
+                    # skip frame if not dark
                     break
-                # if averageColor > 15:
-                #     break
-                # else:
-                #     print('averageColor', averageColor)
-                # dis[1] inches to ball
 
+
+                # SECTION: ground detection
+                # Using the Y distance to the ball and a Graph find the pixels from bottom of ball to bottom of screen
                 X = dis[1]
                 A = 283.8
                 B = -163800.0
@@ -461,13 +434,17 @@ def findCircle(img):
                 Y = Caunchy(X, A, B, C)
 
                 #started at 21 going up by one inch per
-                #went up to 64
+                #went up to 64 inches
 
+                #distanceToBottom pixels from bottom of ball to bottom of screen
+                #Y predicted pixel distance from ball to bottom of screen
+                # get the ratio between them
                 onGroundRatio = distanceToBottom/Y
-                #if (onGroundRatio > -1 and onGroundRatio < 2.3):
-                if (onGroundRatio > -0.5 and onGroundRatio < 1.5):
-                    # #print('onGround',onGroundRatio)
+                # if there close then the ball must be on the ground
+                if (onGroundRatio > -0.2 and onGroundRatio < 1.5):
                     totalDis = abs(dis[0]) + dis[1]
+                    # to find the closest ball
+                    # if our radius is greater than largestRadius do this:
                     if (r > largestRadius):
                         largestDis = totalDis
                         largestRadius = r
@@ -480,14 +457,12 @@ def findCircle(img):
             except Exception as e:
                 print("error finding ball", e)
         if (closestCircle is not None): # code that runs on the closest found ball
-            i = closestCircle
-            r = i[2]
-            #print('radius', i[2])
+            i = closestCircle # closest circle
+            r = i[2] # radius
             cv2.circle(frame, (i[0], i[1]), i[2], (0, 0, 255), 7)
             cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
             # draw on maske_image
-            # label the ball on frame above the ball
-            cv2.putText(
+            cv2.putText( # label the ball on frame above the ball
                 frame, 'Real Ball', (i[0], i[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
             cv2.circle(masked_image, (i[0], i[1]), i[2], (0, 0, 255), 7)
             cv2.circle(masked_image, (i[0], i[1]), 2, (0, 0, 0), 3)
@@ -508,7 +483,7 @@ def findCircle(img):
                 averageYValues.pop(0)
             if len(averageXValues) > averageXQueueLength:
                 averageXValues.pop(0)
-            # get average
+            # get average of positions
             averageY = sum(averageYValues)/len(averageYValues)
             averageX = sum(averageXValues)/len(averageXValues)
             #print('averageY', averageY, 'averageX', averageX)
@@ -521,7 +496,7 @@ def findCircle(img):
                 sendUDP(averageX, averageY, True)
 
             # print('averageY',averageY,'averageX',averageX)
-            # draw text in the corner of the screen
+            # draw text in the corner of the screen with averageDist
             roundedAverageY = round(averageY, 2)
             roundedAverageX = round(averageX, 2)
             # draw black rectange in border to hold text
@@ -535,12 +510,13 @@ def findCircle(img):
             if averageCounter < 0:
                 averageCounter -= 1
     else:
-        #print('no ball found')
+        # No ball found
         if (DEBUG == False):
             sendUDP(0, 0, False)
         return (0,0,False)
 
 
+    # SECTION: bring up windows showing frames
     if (NOGUI == False):
         cv2.imshow('detected', masked_image)
         cv2.imshow('mask', mask)
