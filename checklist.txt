@@ -1,0 +1,35 @@
+issues:
+- frames are black in debug mode: it will show up when it finds a ball
+- filter is working correctly but ball is not being detected: the balls shadow is not same color as match carpet
+- streamPlusBallDetection not working on the laptop: That is the pi script, use findBall.py for debuging
+- AttributeError: 'NoneType' object has no attribute 'copy': change cameraId
+- stream not showing on dashboard! go to http://<ip>:1182/stream.mjpg
+
+Login ssh:
+Raspi front camera: ssh ubuntu@10.8.88.150
+Raspi back camera: ssh ubuntu@10.8.88.151
+Password: raspberry
+
+remove static ip (use to access normal internet): sudo ip addr del dev eth0 <ip>/24
+sudo dhclient eth0
+
+
+
+Checklist:
+Front Camera knob turned to red dot!
+Pi is running a green lighting perodicly flashing
+Red and Blue lights on camera
+One of two Stream is active on dashboard
+
+Tuning Values:
+edit debug program: sudo nano BallDetectionDebug.py
+run debug program: python3 BallDetectionDebug.py -debug
+move color files to pi:  scp <filename> ubuntu@<ip>:/home/2022CoprocessorVision/
+file should be red.pkl or blue.pkl
+
+steps:
+ - change color to red/blue
+ - open program and tune values till its detecting reall ball
+ - Q to quit and move files to pi
+ - repeat with other color
+ - WHEN DONE SSH INTO PI AND RUN sudo reboot
