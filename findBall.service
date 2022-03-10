@@ -6,7 +6,7 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/ubuntu/2022CoprocessorVision/findCircle.py -release
+ExecStart=python3 /home/ubuntu/2022CoprocessorVision/streamPlusBallDetection.py -release
 Restart=on-failure
 RestartSec=10
 KillMode=process
